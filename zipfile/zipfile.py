@@ -15,16 +15,17 @@ def zipDir(mypath,dirname):
 def renameComic():
     count = 0
     for dirAndFile in os.listdir('.'):
-       if os.path.isdir(dirAndFile):
-           shutil.move(os.path.join(dirAndFile,dirAndFile),os.path.join(dirAndFile,'fate'+str(count)))
-           shutil.move(dirAndFile,'fate'+str(count))
-           count += 1
+        if os.path.isdir(dirAndFile):
+            shutil.move(os.path.join(dirAndFile,dirAndFile),os.path.join(dirAndFile,'fate'+str(count)))
+            shutil.move(dirAndFile,'fate'+str(count))
+            count += 1
+
 def zipComic():
     for dirAndFile in os.listdir('.'):
-       if os.path.isdir(dirAndFile):
-           dirname = dirAndFile
-           mypath = os.path.join('.',dirname)
-           zipDir(mypath,dirname)
+        if os.path.isdir(dirAndFile):
+            dirname = dirAndFile
+            mypath = os.path.join('.',dirname)
+            zipDir(mypath,dirname)
 
 renameComic()
 zipComic()
