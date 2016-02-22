@@ -14,24 +14,30 @@ def find_seven_zip():
     return first_exist_path(paths)
 
 
+def generate_args(**kwargs):
+    sequence = ['exe', 'action', 'destination', 'password', 'file']
+    sequence = list(filter(lambda x: x in kwargs.keys(), sequence))
+    if 'password' in sequence:
+        kwargs['password'] = '-p' + kwargs['password']
+    if 'destination' in sequence:
+        kwargs['destination'] = '-o' + kwargs['destination']
+    return list(map(lambda key: kwargs[key], sequence))
+
+
 class SevenZip(object):
     def __init__(self):
         self.exe = find_seven_zip()
 
     def list_zipped_file(self, file, password=None):
-        process = sp.Popen([self.exe, 'l', file], stdin=sp.PIPE, stdout=sp.PIPE)
-        if password is not None:
-            process.stdin.write(password.encode('gbk'))
-            process.stdin.close()
+        args = generate_args(exe=self.exe, password=password, file=file, action='l')
+        process = sp.Popen(args, stdout=sp.PIPE)
         output = process.stdout.read()
         process.wait()
-        return output
+        return output.decode('gbk')
 
-    def unzip_zipped_file(self, file, password=None):
-        process = sp.Popen([self.exe, 'x', file], stdin=sp.PIPE, stdout=sp.PIPE)
-        if password is not None:
-            process.stdin.write(password.encode('gbk'))
-            process.stdin.close()
+    def unzip_zipped_file(self, file, password=None, destination='tmp'):
+        args = generate_args(exe=self.exe, password=password, file=file, action='x', destination=destination)
+        process = sp.Popen(args, stdout=sp.PIPE)
         output = process.stdout.read()
         process.wait()
         return output
