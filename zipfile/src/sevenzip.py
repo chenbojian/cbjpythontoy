@@ -72,15 +72,24 @@ if __name__ == '__main__':
     paths = it.chain(Path('.').glob('*.rar'), Path('.').glob('*.zip'))
     for p in paths:
         rt = SevenZip().unzip(p.name, password=input_args.password, destination=input_args.out_dir)
-        if rt == 0:
-            print(p.name, 'UNZIP---Ok')
-        else:
-            print(p.name, 'UNZIP---Fail')
+        try:
+            if rt == 0:
+                print(p.name, 'UNZIP---Ok')
+            else:
+                print(p.name, 'UNZIP---Fail')
+        except UnicodeEncodeError:
+            print('name has encoding err', rt)
+            continue
 
     with EnterDir(input_args.out_dir):
         for d in Path('.').glob('*'):
             rt = SevenZip().zip(d.name)
-            if rt == 0:
-                print(d.name, 'ZIP---Ok')
-            else:
-                print(d.name, 'ZIP---Fail')
+            try:
+                if rt == 0:
+                    print(d.name, 'ZIP---Ok')
+                else:
+                    print(d.name, 'ZIP---Fail')
+            except UnicodeEncodeError:
+                print('name has encoding err', rt)
+                continue
+
