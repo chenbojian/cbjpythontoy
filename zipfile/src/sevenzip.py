@@ -66,9 +66,6 @@ if __name__ == '__main__':
     parser.add_argument('-o', dest='out_dir', default='tmp')
     input_args = parser.parse_args()
 
-    if Path(input_args.out_dir).exists():
-        shutil.rmtree(input_args.out_dir)
-
     paths = it.chain(Path('.').glob('*.rar'), Path('.').glob('*.zip'))
     for p in paths:
         rt = SevenZip().unzip(p.name, password=input_args.password, destination=input_args.out_dir)
