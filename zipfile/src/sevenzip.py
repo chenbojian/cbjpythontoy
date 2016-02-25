@@ -1,8 +1,21 @@
+import os
 import shutil
 import itertools as it
 import subprocess as sp
 from pathlib import Path
 import argparse
+
+
+class EnterDir(object):
+    def __init__(self, dir):
+        self.dir = dir
+        self.current_dir = os.getcwd()
+
+    def __enter__(self):
+        os.chdir(self.dir)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.chdir(self.current_dir)
 
 
 def first(action, iterable):
@@ -12,16 +25,6 @@ def first(action, iterable):
     return None
 
 
-def generate_args(**kwargs):
-    sequence = ['exe', 'action', 'destination', 'password', 'file']
-    sequence = list(filter(lambda x: x in kwargs.keys(), sequence))
-    if 'password' in sequence:
-        kwargs['password'] = '-p' + kwargs['password']
-    if 'destination' in sequence:
-        kwargs['destination'] = '-o' + kwargs['destination']
-    return list(map(lambda key: kwargs[key], sequence))
-
-
 class SevenZip(object):
     def __init__(self):
         dirs = [r'C:\7z.exe', r'C:\Program Files\7-Zip\7z.exe']
@@ -29,17 +32,24 @@ class SevenZip(object):
         self.output = []
         self.err = []
 
-    def list_zipped_file(self, file, password=None):
-        args = generate_args(exe=self.exe, password=password, file=file, action='l')
+    def list(self, file, password=None):
+        if password is None:
+            args = [self.exe, 'l', file]
+        else:
+            args = [self.exe, 'l', '-p' + password, file]
 
         return self.__execute(args)
 
-    def unzip_zipped_file(self, file, password=None, destination='tmp'):
+    def unzip(self, file, password=None, destination='tmp'):
         if password is None:
-            args = generate_args(exe=self.exe, file=file, action='x', destination=destination)
+            args = [self.exe, 'x', '-o' + destination, file]
         else:
-            args = generate_args(exe=self.exe, password=password, file=file, action='x', destination=destination)
+            args = [self.exe, 'x', '-p' + password, '-o' + destination, file]
 
+        return self.__execute(args)
+
+    def zip(self, dir):
+        args = [self.exe, 'a', '-tzip', dir + '.zip', dir]
         return self.__execute(args)
 
     def __execute(self, args):
@@ -59,11 +69,18 @@ if __name__ == '__main__':
     if Path(input_args.out_dir).exists():
         shutil.rmtree(input_args.out_dir)
 
-    sz = SevenZip()
     paths = it.chain(Path('.').glob('*.rar'), Path('.').glob('*.zip'))
     for p in paths:
-        rt = sz.unzip_zipped_file(p.name, password=input_args.password, destination=input_args.out_dir)
+        rt = SevenZip().unzip(p.name, password=input_args.password, destination=input_args.out_dir)
         if rt == 0:
-            print(p.name, 'Ok')
+            print(p.name, 'UNZIP---Ok')
         else:
-            print(p.name, 'Fail')
+            print(p.name, 'UNZIP---Fail')
+
+    with EnterDir(input_args.out_dir):
+        for d in Path('.').glob('*'):
+            rt = SevenZip().zip(d.name)
+            if rt == 0:
+                print(d.name, 'ZIP---Ok')
+            else:
+                print(d.name, 'ZIP---Fail')
