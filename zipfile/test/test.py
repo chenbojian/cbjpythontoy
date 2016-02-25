@@ -1,7 +1,7 @@
 import shutil
 import unittest
 
-from unzipcomic import *
+from unzip import *
 
 
 class MyTestCase(unittest.TestCase):

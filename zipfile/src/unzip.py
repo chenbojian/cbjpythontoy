@@ -1,4 +1,5 @@
 import shutil
+import itertools as it
 import subprocess as sp
 from pathlib import Path
 import argparse
@@ -59,7 +60,7 @@ if __name__ == '__main__':
         shutil.rmtree(input_args.out_dir)
 
     sz = SevenZip()
-    paths = Path('.').glob('*.rar')
+    paths = it.chain(Path('.').glob('*.rar'), Path('.').glob('*.zip'))
     for p in paths:
         rt = sz.unzip_zipped_file(p.name, password=input_args.password, destination=input_args.out_dir)
         if rt == 0:
